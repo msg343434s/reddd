@@ -1,29 +1,32 @@
 const mongoose = require('mongoose');
 
 const mongoURI = process.env.MONGO_URI;
+if (!mongoURI) {
+    console.error("❌ ERROR: MONGO_URI is missing in environment variables.");
+    process.exit(1);
+}
 
 mongoose.connect(mongoURI)
-    .then(() => console.log("MongoDB Connected"))
+    .then(() => console.log("✅ MongoDB connected"))
     .catch(err => {
-        console.error("MongoDB Error:", err.message);
+        console.error("❌ MongoDB connection error:", err);
         process.exit(1);
     });
 
 const redirectSchema = new mongoose.Schema({
     key: { type: String, required: true, unique: true },
     destination: { type: String, required: true },
-    token: { type: String, required: true },
+    token: { type: String, required: true }
 }, { timestamps: true });
 
 const Redirect = mongoose.model('Redirect', redirectSchema);
 
 // Add redirect
 async function addRedirect(key, destination, token) {
-    const newRedirect = new Redirect({ key, destination, token });
-    await newRedirect.save();
+    await Redirect.create({ key, destination, token });
 }
 
-// Get redirect by key
+// Get redirect
 async function getRedirect(key) {
     return await Redirect.findOne({ key }).lean();
 }
@@ -38,8 +41,8 @@ async function updateRedirect(key, newDestination) {
     return await Redirect.findOneAndUpdate(
         { key },
         { destination: newDestination },
-        { new: true, lean: true }
-    );
+        { new: true }
+    ).lean();
 }
 
 // Delete
@@ -52,5 +55,5 @@ module.exports = {
     getRedirect,
     getAllRedirects,
     updateRedirect,
-    deleteRedirect,
+    deleteRedirect
 };
