@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verification Required</title>
+</head>
+<body>
+    <h2>Browser Verification</h2>
+    <p>Please check the box to continue.</p>
+
+    <label>
+        <input type="checkbox" id="humanCheck">
+        I am human
+    </label>
+
+    <br><br>
+    <button id="continueBtn">Continue</button>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const dest = params.get("dest");
+
+        document.getElementById("continueBtn").onclick = () => {
+            if (!document.getElementById("humanCheck").checked) {
+                alert("Please check the box to continue.");
+                return;
+            }
+            window.location.href = dest;
+        };
+    </script>
+</body>
+</html>
