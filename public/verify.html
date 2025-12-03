@@ -1,31 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Verification Required</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #4b79a1, #283e51);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            text-align: center;
+        }
+
+        #dropZone {
+            width: 300px;
+            height: 200px;
+            border: 3px dashed #00ffae;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ffae;
+            font-size: 20px;
+            transition: background 0.3s, border-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #dropZone.hover {
+            background: rgba(0, 255, 174, 0.2);
+            border-color: #fff;
+        }
+
+        #animal {
+            width: 130px;
+            cursor: grab;
+            margin-top: 40px;
+        }
+
+        #redirectMsg {
+            font-size: 22px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h2>Browser Verification</h2>
-    <p>Please check the box to continue.</p>
 
-    <label>
-        <input type="checkbox" id="humanCheck">
-        I am human
-    </label>
+    <h2>Human Verification</h2>
+    <p id="instruction">Drag the dog into the box to continue</p>
 
-    <br><br>
-    <button id="continueBtn">Continue</button>
+    <div id="dropZone">Drop Here</div>
+
+    <img id="animal" draggable="true">
+
+    <div id="redirectMsg">Redirecting in <span id="countdown">3</span>…</div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const dest = params.get("dest");
 
-        document.getElementById("continueBtn").onclick = () => {
-            if (!document.getElementById("humanCheck").checked) {
-                alert("Please check the box to continue.");
-                return;
+        const instruction = document.getElementById("instruction");
+        const animal = document.getElementById("animal");
+        const dropZone = document.getElementById("dropZone");
+        const redirectMsg = document.getElementById("redirectMsg");
+        const countdown = document.getElementById("countdown");
+
+        // Image array with display names
+        const dogImages = [
+            { url: "https://cdn-icons-png.flaticon.com/512/620/620851.png", name: "dog" },
+            { url: "https://cdn-icons-png.flaticon.com/512/1998/1998610.png", name: "puppy" },
+            { url: "https://cdn-icons-png.flaticon.com/512/616/616408.png", name: "hound" },
+            { url: "https://cdn-icons-png.flaticon.com/512/620/620840.png", name: "beagle" },
+            { url: "https://cdn-icons-png.flaticon.com/512/194/194279.png", name: "pup" }
+        ];
+
+        // Pick a random image and set instruction
+        const randomDog = dogImages[Math.floor(Math.random() * dogImages.length)];
+        animal.src = randomDog.url;
+        instruction.textContent = `Drag the ${randomDog.name} into the box to continue`;
+
+        // Drag events
+        animal.addEventListener("dragstart", (e) => {
+            e.dataTransfer.setData("dog", "verified");
+        });
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("hover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("hover");
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("hover");
+
+            if (e.dataTransfer.getData("dog") === "verified") {
+                dropZone.innerHTML = "✔ Verified";
+                dropZone.style.color = "#fff";
+                dropZone.style.background = "rgba(0,255,150,0.3)";
+                dropZone.style.borderColor = "#fff";
+
+                // Show countdown message
+                redirectMsg.style.display = "block";
+
+                // Start redirect countdown
+                let time = 2;
+                const timer = setInterval(() => {
+                    time--;
+                    countdown.textContent = time;
+
+                    if (time === 0) {
+                        clearInterval(timer);
+                        window.location.href = dest;
+                    }
+                }, 1000);
             }
-            window.location.href = dest;
-        };
+        });
     </script>
+
 </body>
 </html>
